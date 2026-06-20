@@ -7,9 +7,11 @@ import UserNotifications
 struct PracticeReminders {
     static let categoryID = "practice.reminder"
 
-    /// Pleasant times to nudge, picked so even four reminders stay spread and unobtrusive.
-    private static let slots: [(hour: Int, minute: Int)] =
-        [(9, 0), (12, 30), (16, 0), (19, 0)]
+    /// Up to four reminders a day; identifiers reserved so we can always clear them.
+    static let maxPerDay = 4
+
+    /// Hours between successive reminders when more than one a day is chosen.
+    private static let spacingHours = 3
 
     private static let messages = [
         "A few minutes of practice? Little and often is what helps.",
@@ -25,15 +27,17 @@ struct PracticeReminders {
         return (try? await center.requestAuthorization(options: [.alert, .sound])) ?? false
     }
 
-    /// Replace any existing reminders with `count` daily repeating ones at spread times.
-    func schedule(timesPerDay count: Int) async {
+    /// Replace any existing reminders with `count` daily repeating ones, the first at
+    /// `hour:minute` and the rest spaced `spacingHours` apart (wrapping within the day).
+    func schedule(timesPerDay count: Int, startHour hour: Int, startMinute minute: Int) async {
         let center = UNUserNotificationCenter.current()
         await disable()
-        let n = max(1, min(count, Self.slots.count))
+        let n = max(1, min(count, Self.maxPerDay))
         for i in 0..<n {
+            let total = (hour * 60 + minute + i * Self.spacingHours * 60) % (24 * 60)
             var components = DateComponents()
-            components.hour = Self.slots[i].hour
-            components.minute = Self.slots[i].minute
+            components.hour = total / 60
+            components.minute = total % 60
 
             let content = UNMutableNotificationContent()
             content.title = "Tadpole Talk"
@@ -51,7 +55,7 @@ struct PracticeReminders {
     /// Remove all scheduled practice reminders.
     func disable() async {
         let center = UNUserNotificationCenter.current()
-        let ids = (0..<Self.slots.count).map { "\(Self.categoryID).\($0)" }
+        let ids = (0..<Self.maxPerDay).map { "\(Self.categoryID).\($0)" }
         center.removePendingNotificationRequests(withIdentifiers: ids)
     }
 }

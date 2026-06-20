@@ -9,8 +9,25 @@ struct SettingsView: View {
     @Environment(\.modelContext) private var context
     @AppStorage("remindersEnabled") private var remindersEnabled = false
     @AppStorage("remindersPerDay") private var remindersPerDay = 3
+    /// First reminder time, stored as minutes since midnight. Default 9:00 AM.
+    @AppStorage("reminderMinutes") private var reminderMinutes = 9 * 60
 
     private let reminders = PracticeReminders()
+
+    /// Bridges the stored minutes-since-midnight to a `Date` for the picker.
+    private var reminderTime: Binding<Date> {
+        Binding(
+            get: {
+                Calendar.current.date(
+                    bySettingHour: reminderMinutes / 60,
+                    minute: reminderMinutes % 60, second: 0, of: Date()) ?? Date()
+            },
+            set: { date in
+                let c = Calendar.current.dateComponents([.hour, .minute], from: date)
+                reminderMinutes = (c.hour ?? 9) * 60 + (c.minute ?? 0)
+            }
+        )
+    }
 
     var body: some View {
         NavigationStack {
@@ -19,6 +36,10 @@ struct SettingsView: View {
                     Toggle("Daily practice reminders", isOn: $remindersEnabled)
                         .accessibilityIdentifier("settings.remindersToggle")
                     if remindersEnabled {
+                        DatePicker("First reminder at",
+                                   selection: reminderTime,
+                                   displayedComponents: .hourAndMinute)
+                            .accessibilityIdentifier("settings.reminderTime")
                         Stepper("\(remindersPerDay) a day", value: $remindersPerDay, in: 1...4)
                     }
                 } header: {
@@ -51,6 +72,7 @@ struct SettingsView: View {
             }
             .onChange(of: remindersEnabled) { _, on in applyReminders(enabled: on) }
             .onChange(of: remindersPerDay) { _, _ in if remindersEnabled { applyReminders(enabled: true) } }
+            .onChange(of: reminderMinutes) { _, _ in if remindersEnabled { applyReminders(enabled: true) } }
         }
     }
 
@@ -83,7 +105,9 @@ struct SettingsView: View {
             if enabled {
                 let granted = await reminders.requestAuthorization()
                 if granted {
-                    await reminders.schedule(timesPerDay: remindersPerDay)
+                    await reminders.schedule(timesPerDay: remindersPerDay,
+                                             startHour: reminderMinutes / 60,
+                                             startMinute: reminderMinutes % 60)
                 } else {
                     remindersEnabled = false   // permission denied — reflect reality
                 }
