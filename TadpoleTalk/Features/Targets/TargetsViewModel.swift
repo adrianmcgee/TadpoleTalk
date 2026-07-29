@@ -21,11 +21,17 @@ final class TargetsViewModel {
     }
 
     /// Create a new target for the child. Returns it so a caller can navigate if needed.
+    /// `id` defaults to a fresh UUID but can be supplied so a clip recorded in the editor
+    /// (keyed by that id) matches the saved target.
     @discardableResult
     func add(text: String, shape: SyllableShape, phonemeIDs: [String], notes: String,
-             activeThisWeek: Bool, to child: Child, in context: ModelContext) -> WordTarget {
+             activeThisWeek: Bool, carrierPhrase: String? = nil, audioFilename: String? = nil,
+             id: UUID = UUID(), to child: Child, in context: ModelContext) -> WordTarget {
         let target = WordTarget(text: text.trimmingCharacters(in: .whitespaces), shape: shape,
-                                phonemeIDs: phonemeIDs, isActiveThisWeek: activeThisWeek, notes: notes)
+                                phonemeIDs: phonemeIDs, isActiveThisWeek: activeThisWeek, notes: notes,
+                                carrierPhrase: carrierPhrase)
+        target.id = id
+        target.audioFilename = audioFilename
         target.child = child
         context.insert(target)
         context.saveOrLog()

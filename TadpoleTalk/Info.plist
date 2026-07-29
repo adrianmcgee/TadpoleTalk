@@ -23,7 +23,7 @@
 	<key>NSCameraUsageDescription</key>
 	<string>Record a short video of your therapist's sound or sign demonstration to play back during home practice.</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>Record your therapist's sound or sign demonstration to play back during home practice.</string>
+	<string>Record your own voice saying a word so your child hears a familiar model during practice. Recordings stay on this device.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

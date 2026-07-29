@@ -12,6 +12,12 @@ struct SettingsView: View {
     /// First reminder time, stored as minutes since midnight. Default 9:00 AM.
     @AppStorage("reminderMinutes") private var reminderMinutes = 9 * 60
 
+    // Practice settings, read back when starting a session on the home screen.
+    @AppStorage("repGoalPerWord") private var repGoalPerWord = 5
+    @AppStorage("practiceOrderRaw") private var practiceOrderRaw = PracticeOrder.blocked.rawValue
+    @AppStorage("autoAdvance") private var autoAdvance = false
+    @AppStorage("autoPlayModel") private var autoPlayModel = true
+
     private let reminders = PracticeReminders()
 
     /// Bridges the stored minutes-since-midnight to a `Date` for the picker.
@@ -46,6 +52,26 @@ struct SettingsView: View {
                     Text("Reminders")
                 } footer: {
                     Text("Short, spread-out nudges — because a few minutes several times a day helps far more than one long session.")
+                }
+
+                Section {
+                    Stepper("Aim for \(repGoalPerWord) good reps", value: $repGoalPerWord, in: 3...10)
+                        .accessibilityIdentifier(A11y.settingsRepGoal)
+                    Picker("Word order", selection: $practiceOrderRaw) {
+                        ForEach(PracticeOrder.allCases) { order in
+                            Text(order.title).tag(order.rawValue)
+                        }
+                    }
+                    .accessibilityIdentifier(A11y.settingsPracticeOrder)
+                    Toggle("Move on automatically", isOn: $autoAdvance)
+                        .accessibilityIdentifier(A11y.settingsAutoAdvance)
+                    Toggle("Play the word automatically", isOn: $autoPlayModel)
+                        .accessibilityIdentifier(A11y.settingsAutoPlayModel)
+                } header: {
+                    Text("Practice")
+                } footer: {
+                    Text(PracticeOrder(rawValue: practiceOrderRaw)?.detail
+                         ?? "Choose how practice is paced.")
                 }
 
                 Section("Child") {

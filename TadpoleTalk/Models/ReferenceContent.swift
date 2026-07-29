@@ -1,9 +1,9 @@
 import Foundation
 
 /// A speech sound in the reference library. Shipped as bundled, read-only data with
-/// **original** descriptive content (place / manner / voicing + example words) and an
-/// in-app generated mouth diagram — no licensed cue artwork. A parent may later attach
-/// their own recorded demo clip, keyed by `id`.
+/// **original** descriptive content (place / manner / voicing + example words) and
+/// plain-language guidance. A parent may later attach their own recorded demo clip,
+/// keyed by `id`.
 struct Phoneme: Codable, Identifiable, Hashable {
     let id: String          // e.g. "p", "b", "ah"
     let ipa: String         // IPA symbol shown to parents who want it
@@ -24,7 +24,7 @@ struct Phoneme: Codable, Identifiable, Hashable {
     /// older content still decodes; a "Hand cue" card shows only when set.
     let handCue: String?
     let exampleWords: [String]
-    /// Drives the generated mouth diagram (lips / tongue-tip / back / open).
+    /// Broad articulator category retained for content classification.
     let articulator: Articulator
 
     /// Numbered steps to show, falling back to the single `howTo` line when none are given.

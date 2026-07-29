@@ -6,8 +6,8 @@ options:
   developmentLanguage: en
 settings:
   base:
-    MARKETING_VERSION: "1.0"
-    CURRENT_PROJECT_VERSION: "3"
+    MARKETING_VERSION: "1.2"
+    CURRENT_PROJECT_VERSION: "5"
     SWIFT_VERSION: "5.0"
     GENERATE_INFOPLIST_FILE: YES
     ENABLE_USER_SCRIPT_SANDBOXING: YES
@@ -38,8 +38,8 @@ targets:
           - UIInterfaceOrientationPortraitUpsideDown
           - UIInterfaceOrientationLandscapeLeft
           - UIInterfaceOrientationLandscapeRight
-        # Microphone is only needed if the parent later records their SLP's demo clip.
-        NSMicrophoneUsageDescription: "Record your therapist's sound or sign demonstration to play back during home practice."
+        # Microphone is used when a parent records their own voice as the model for a word.
+        NSMicrophoneUsageDescription: "Record your own voice saying a word so your child hears a familiar model during practice. Recordings stay on this device."
         NSCameraUsageDescription: "Record a short video of your therapist's sound or sign demonstration to play back during home practice."
     settings:
       base:

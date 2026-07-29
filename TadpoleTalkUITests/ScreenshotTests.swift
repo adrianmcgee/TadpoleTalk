@@ -24,13 +24,14 @@ final class ScreenshotTests: XCTestCase {
         XCTAssertTrue(today.startButton.waitForExistence(timeout: 5))
         shot("01-Today")
 
-        // 2. Practice — word, mouth diagram, rating buttons
+        // 2. Practice — word, modelling controls, rating buttons
         today.startPractice()
+        let practice = PracticeScreen(app: app)
+        practice.startWhenReady()
         XCTAssertTrue(app.buttons["practice.rating.correct"].waitForExistence(timeout: 5))
         shot("02-Practice")
 
         // 3. Celebration summary
-        let practice = PracticeScreen(app: app)
         for _ in 0..<3 {
             if app.buttons["practice.rating.correct"].waitForExistence(timeout: 5) {
                 practice.logCorrect()

@@ -52,7 +52,14 @@ struct TodayScreen {
 
 struct PracticeScreen {
     let app: XCUIApplication
+    func startWhenReady() {
+        let start = app.buttons["practice.readiness.start"]
+        XCTAssertTrue(start.waitForExistence(timeout: 5), "readiness check should appear before practice")
+        start.tap()
+    }
     func logCorrect() { app.buttons["practice.rating.correct"].firstMatch.tap() }
+    func logApprox() { app.buttons["practice.rating.approx"].firstMatch.tap() }
+    func addMoreSupport() { app.buttons["practice.intervention.moreSupport"].tap() }
     func next() {
         let next = app.buttons["practice.next"]
         if next.exists { next.tap() }

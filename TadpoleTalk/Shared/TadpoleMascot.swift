@@ -3,7 +3,7 @@ import SwiftUI
 /// The Tadpole Talk mascot, drawn entirely with SwiftUI shapes (no bundled artwork) so it scales
 /// crisply and recolours with the theme in light/dark. Geometry is ported 1:1 from
 /// `design_handoff/assets/mascot.svg` (a 0–100 viewBox) and mapped onto `Theme` tokens — same
-/// approach as `MouthDiagram.swift`.
+/// approach as the rest of the app's native SwiftUI artwork.
 struct TadpoleMascot: View {
     var body: some View {
         Canvas { ctx, size in

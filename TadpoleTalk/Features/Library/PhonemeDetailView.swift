@@ -1,8 +1,7 @@
 import SwiftUI
 
-/// How to make one speech sound: a generated mouth diagram plus original, plain-language
-/// guidance (place / manner / voicing / "show your child") and example words. No licensed
-/// cue artwork — everything here is drawn or written for this app.
+/// How to make one speech sound using plain-language guidance for place, manner, voicing,
+/// modelling, and an optional hand cue.
 struct PhonemeDetailView: View {
     let phoneme: Phoneme
 
@@ -11,11 +10,6 @@ struct PhonemeDetailView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: Theme.sp5) {
-                MouthDiagram(phoneme: phoneme, style: .full, animated: true)
-                    .frame(height: 180)
-                    .frame(maxWidth: .infinity)
-                    .background(Theme.card, in: RoundedRectangle(cornerRadius: Theme.corner))
-
                 VStack(alignment: .leading, spacing: Theme.sp2) {
                     Text(phoneme.label).font(.title2.bold()).foregroundStyle(Theme.label)
                     Text("Sound: /\(phoneme.ipa)/  ·  \(phoneme.kind == .vowel ? "Vowel" : "Consonant")")

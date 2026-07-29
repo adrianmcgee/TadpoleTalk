@@ -28,7 +28,7 @@ Built around how CAS practice actually works:
 • Log each attempt with one tap and celebrate the wins that build speech movements.
 • A target bank organised by sound shape (CV, VC, CVC…), following the progression your
   therapist uses.
-• A reference library for sounds (with simple mouth diagrams) and Key Word Signs.
+• A reference library for sounds (with plain-language placement and cue guidance) and Key Word Signs.
 • Progress charts, plus a one-tap PDF/CSV export to share with your speech pathologist.
 • Gentle, spread-out reminders for little-and-often practice.
 
@@ -57,8 +57,8 @@ data is stored on-device only. No data types are collected or tracked.
 
 ## Screenshot shot list (capture via the UI tests' attachments or manually)
 1. Today screen with this week's words and streak.
-2. A practice session showing a word, mouth diagram, and the three rating buttons.
+2. A practice session showing a word, modelling controls, and the three rating buttons.
 3. The success/celebration summary.
-4. Sounds library (grid of mouth diagrams).
+4. Sounds library (speech sound reference grid).
 5. Progress charts.
 Provide iPhone 6.7" and iPad 12.9" sizes.

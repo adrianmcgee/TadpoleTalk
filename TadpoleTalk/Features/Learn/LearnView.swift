@@ -23,6 +23,12 @@ struct LearnView: View {
                     link("Key Word Sign Australia", "https://www.scopeaust.org.au/services/key-word-sign")
                 }
 
+                Section("More caregiver guidance") {
+                    link("Positive home practice", "https://childapraxiatreatment.org/home-practice/")
+                    link("Reducing communication frustration",
+                         "https://childapraxiatreatment.org/how-to-decrease-frustration/")
+                }
+
                 Section {
                     NavigationLink {
                         ArticleView(article: Self.disclaimer)
@@ -30,7 +36,8 @@ struct LearnView: View {
                         Label("About & disclaimer", systemImage: "info.circle")
                     }
                 } footer: {
-                    Text("Tadpole Talk supports therapy directed by your speech pathologist. It does not diagnose or replace professional care.")
+                    Text("Tadpole Talk supports therapy directed by your speech pathologist. "
+                         + "It does not diagnose or replace professional care.")
                 }
             }
             .navigationTitle("Learn")
@@ -89,19 +96,29 @@ extension LearnView {
             body: [
                 "Childhood Apraxia of Speech (CAS) is a motor speech difference. Your child knows exactly what they want to say "
                     + "— but the brain has trouble planning and co-ordinating the precise mouth movements to say it.",
-                "That's why the same word can come out differently each time, and why longer or more complex words are harder. It is not a problem with muscles, intelligence, or wanting to talk.",
-                "CAS responds best to frequent, focused practice of speech movements — which is exactly what your weekly sessions and short home practice are building."
+                "That's why the same word can come out differently each time, and why longer or more complex words are harder. "
+                    + "It is not a problem with muscles, intelligence, or wanting to talk.",
+                "CAS responds best to frequent, focused practice of speech movements — which is exactly what your weekly sessions "
+                    + "and short home practice are building."
             ]
         ),
         Article(
             title: "How to practise well at home",
             symbol: "checklist",
             body: [
-                "Little and often beats long and rare. A few minutes, several times a day, helps the movements stick far more than one long weekly session.",
+                "Choose a moment when your child is calm enough, able to look and listen, and willing to have a go. "
+                    + "If they are tired, upset, or resisting, it is okay to try later.",
+                "Little and often beats long and rare. A few minutes at a time gives you a better chance of keeping practice "
+                    + "focused and successful.",
                 "Aim for success, not volume. A handful of good attempts is worth more than many wrong ones "
-                    + "— getting it right is what trains the movement. Keep it light and stop while it's still fun.",
-                "Use lots of senses. Let your child watch your mouth, hear the sound, and feel it. Saying the word together slowly, then fading your help, is a powerful pattern.",
-                "Follow your therapist's targets. Practise the specific words and sounds your speech pathologist has chosen — they're picked to match exactly where your child is."
+                    + "— getting it right is what trains the movement. After a couple of difficult tries, add help, model the word, "
+                    + "or move on positively.",
+                "Start with enough help for success: say the word together or let your child try just after your model. "
+                    + "Fade that help as the movement becomes easier.",
+                "Acknowledge every form of communication, including speech, signs, gestures, pictures, or a device. "
+                    + "Feeling heard takes pressure off speech practice.",
+                "Follow your speech pathologist's targets and cueing advice. If a target remains consistently difficult, "
+                    + "pause it and ask whether it should be made easier or changed."
             ]
         ),
         Article(
@@ -109,7 +126,8 @@ extension LearnView {
             symbol: "hands.sparkles.fill",
             body: [
                 "Key Word Sign is a bridge to speech, not a replacement for it. Always say the word as you sign it.",
-                "Giving your child a reliable way to be understood reduces frustration and actually supports talking — it takes the pressure off while the spoken words develop.",
+                "Giving your child a reliable way to be understood reduces frustration and actually supports talking "
+                    + "— it takes the pressure off while the spoken words develop.",
                 "As speech comes, the signs naturally fall away. There's no rush either way."
             ]
         )
@@ -121,7 +139,8 @@ extension LearnView {
         body: [
             "Tadpole Talk is a home-practice companion for families of children with Childhood Apraxia of Speech. "
                 + "It is designed to be used alongside therapy directed by a qualified speech pathologist.",
-            "It does not diagnose, assess, or treat any condition, and it is not a substitute for professional advice. Always check new targets and techniques with your speech pathologist.",
+            "It does not diagnose, assess, or treat any condition, and it is not a substitute for professional advice. "
+                + "Always check new targets and techniques with your speech pathologist.",
             "Your privacy matters: everything you enter stays on this device. There is no account, no tracking, and nothing is uploaded."
         ]
     )

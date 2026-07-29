@@ -33,7 +33,8 @@ struct LibraryView: View {
     }
 }
 
-/// Grid of speech sounds. Tapping one opens how to make it, with a generated mouth diagram.
+/// Grid of speech sounds. Each sound uses a neutral IPA badge until reviewed
+/// instructional illustrations are available.
 struct PhonemeLibraryView: View {
     private let phonemes = ContentStore.shared.phonemes
 
@@ -45,8 +46,14 @@ struct PhonemeLibraryView: View {
                         PhonemeDetailView(phoneme: p)
                     } label: {
                         VStack(spacing: Theme.sp2) {
-                            MouthDiagram(phoneme: p, style: .compact)
-                                .frame(height: 84)
+                            Text("/\(p.ipa)/")
+                                .font(.system(size: 36, weight: .bold, design: .rounded))
+                                .foregroundStyle(Theme.brandInk)
+                                .frame(maxWidth: .infinity, minHeight: 84)
+                                .background(
+                                    Theme.brand.opacity(0.10),
+                                    in: RoundedRectangle(cornerRadius: Theme.cornerSm)
+                                )
                             Text(p.label).font(.subheadline.weight(.medium))
                                 .foregroundStyle(Theme.label)
                                 .multilineTextAlignment(.center)

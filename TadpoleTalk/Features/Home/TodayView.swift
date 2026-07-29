@@ -10,6 +10,12 @@ struct TodayView: View {
     @State private var showingPractice = false
     @State private var showingSettings = false
 
+    // Practice settings, set in Settings and handed to each session.
+    @AppStorage("repGoalPerWord") private var repGoalPerWord = 5
+    @AppStorage("practiceOrderRaw") private var practiceOrderRaw = PracticeOrder.blocked.rawValue
+    @AppStorage("autoAdvance") private var autoAdvance = false
+    @AppStorage("autoPlayModel") private var autoPlayModel = true
+
     private var activeTargets: [WordTarget] { child.activeTargets }
 
     var body: some View {
@@ -38,7 +44,14 @@ struct TodayView: View {
                 }
             }
             .fullScreenCover(isPresented: $showingPractice) {
-                PracticeSessionView(child: child, targets: activeTargets)
+                PracticeSessionView(
+                    child: child,
+                    targets: activeTargets,
+                    order: PracticeOrder(rawValue: practiceOrderRaw) ?? .blocked,
+                    repGoal: repGoalPerWord,
+                    autoAdvance: autoAdvance,
+                    autoPlayModel: autoPlayModel
+                )
             }
             .sheet(isPresented: $showingSettings) {
                 SettingsView(child: child) { showingSettings = false }

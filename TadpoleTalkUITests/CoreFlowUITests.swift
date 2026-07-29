@@ -26,6 +26,7 @@ final class CoreFlowUITests: XCTestCase {
 
         // Onboarding seeds three active CV words; log each and advance.
         let practice = PracticeScreen(app: app)
+        practice.startWhenReady()
         for _ in 0..<3 {
             XCTAssertTrue(app.buttons["practice.rating.correct"].waitForExistence(timeout: 5))
             practice.logCorrect()
@@ -37,6 +38,41 @@ final class CoreFlowUITests: XCTestCase {
 
         XCTAssertTrue(practice.waitForSummary(), "session should end on the celebration screen")
         attachScreenshot(name: "Summary")
+    }
+
+    /// Repeated difficulty pauses ratings until the caregiver chooses a positive response.
+    func testPracticeDifficultyGuardrail() {
+        DisclaimerScreen(app: app).accept()
+        OnboardingScreen(app: app).createChild(named: "Mia")
+
+        TodayScreen(app: app).startPractice()
+        let practice = PracticeScreen(app: app)
+        practice.startWhenReady()
+        XCTAssertTrue(app.buttons["practice.rating.approx"].waitForExistence(timeout: 5))
+
+        practice.logApprox()
+        practice.logApprox()
+
+        XCTAssertTrue(app.otherElements["practice.intervention"].waitForExistence(timeout: 5))
+        XCTAssertFalse(app.buttons["practice.rating.correct"].exists)
+        practice.addMoreSupport()
+        XCTAssertTrue(app.buttons["practice.rating.correct"].waitForExistence(timeout: 5))
+    }
+
+    /// Deferring practice returns home without recording practice history.
+    func testTryPracticeLaterLeavesHistoryEmpty() {
+        DisclaimerScreen(app: app).accept()
+        OnboardingScreen(app: app).createChild(named: "Mia")
+
+        TodayScreen(app: app).startPractice()
+        let later = app.buttons["practice.readiness.later"]
+        XCTAssertTrue(later.waitForExistence(timeout: 5))
+        later.tap()
+        XCTAssertTrue(TodayScreen(app: app).startButton.waitForExistence(timeout: 5))
+
+        TabBar(app: app).progress()
+        XCTAssertTrue(app.staticTexts["Your practice will show up here once you've had a few goes."]
+            .waitForExistence(timeout: 5))
     }
 
     /// Add a brand-new word from the Targets tab.

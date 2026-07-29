@@ -97,3 +97,102 @@ enum TrialRating: String, Codable, CaseIterable, Identifiable {
     /// Counts toward "successful reps" — the number that actually drives motor learning.
     var isSuccess: Bool { self == .correct }
 }
+
+/// How a practice session sequences its words. Motor learning favours *blocked* practice
+/// while a movement is being acquired, then *random* (interleaved) practice to help it
+/// generalise — so the parent can pick which suits where their child is at.
+enum PracticeOrder: String, Codable, CaseIterable, Identifiable {
+    case blocked   // drill one word to its goal, then the next
+    case random    // mix the words up between attempts
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .blocked: return "Build up a word"
+        case .random:  return "Mix it up"
+        }
+    }
+
+    var detail: String {
+        switch self {
+        case .blocked: return "Practise one word until it's solid, then move on."
+        case .random:  return "Jump between words to help them stick."
+        }
+    }
+}
+
+/// The amount of modelling support used for the current practice attempt. This is
+/// deliberately session-only: it helps a caregiver pace practice without turning the app
+/// into an assessment tool or storing a clinical judgement.
+enum PracticeSupportLevel: Int, CaseIterable, Identifiable {
+    case together
+    case immediate
+    case delayed
+    case independent
+
+    var id: Int { rawValue }
+
+    var title: String {
+        switch self {
+        case .together: return "Together"
+        case .immediate: return "Right after me"
+        case .delayed: return "After a pause"
+        case .independent: return "On their own"
+        }
+    }
+
+    var detail: String {
+        switch self {
+        case .together: return "Say it slowly at the same time."
+        case .immediate: return "Model it, then let them try straight away."
+        case .delayed: return "Model it, wait a moment, then invite a try."
+        case .independent: return "Let them try without a model first."
+        }
+    }
+
+    /// One step toward more help, stopping at simultaneous production.
+    var moreSupported: PracticeSupportLevel {
+        PracticeSupportLevel(rawValue: max(PracticeSupportLevel.together.rawValue, rawValue - 1))
+            ?? .together
+    }
+}
+
+/// Toddler-friendly carrier-phrase templates a parent can attach to a target with one tap.
+/// `___` marks where the target word drops in. "Custom" lets the parent type their own.
+enum CarrierPhrasePreset: String, CaseIterable, Identifiable {
+    case none      = ""
+    case more      = "more ___"
+    case iWant     = "I want ___"
+    case please    = "___ please"
+    case big       = "big ___"
+    case my        = "my ___"
+    case custom    = "custom"
+
+    var id: String { rawValue }
+
+    /// The label shown in the picker.
+    var title: String {
+        switch self {
+        case .none:   return "No phrase (just the word)"
+        case .custom: return "Custom…"
+        default:      return template.replacingOccurrences(of: "___", with: "word")
+        }
+    }
+
+    /// The template stored on the target. Empty for `.none`/`.custom` (custom text is
+    /// entered separately).
+    var template: String {
+        switch self {
+        case .none, .custom: return ""
+        default:             return rawValue
+        }
+    }
+
+    /// The preset matching a stored template, falling back to `.custom` for anything
+    /// non-empty that isn't a known preset, and `.none` for empty/nil.
+    static func matching(_ stored: String?) -> CarrierPhrasePreset {
+        guard let stored, !stored.isEmpty else { return .none }
+        return allCases.first { $0.rawValue == stored && $0 != .custom } ?? .custom
+    }
+}

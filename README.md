@@ -9,11 +9,11 @@ iOS / iPadOS 17+ · SwiftUI · MVVM · SwiftData (local-only) · XcodeGen.
 ## What it does
 - **Today** — an encouraging home screen: this week's words, a practice streak, one button
   to start a short session.
-- **Practice** — parent-led, one word at a time, with a generated mouth diagram, a DTTC-style
+- **Practice** — parent-led, one word at a time, with plain-language sound guidance, a DTTC-style
   cueing-ladder reminder, three one-tap ratings, and a celebratory reward on success.
 - **Targets** — a word bank organised by syllable shape (CV → VC → CVC → CVCV…), seeded and
   fully editable; star the words that are this week's focus.
-- **Library** — reference for speech sounds (original mouth diagrams + plain-language how-to)
+- **Library** — reference for speech sounds (plain-language how-to and optional hand cues)
   and Key Word Signs.
 - **Progress** — charts of practice over time and per word, plus a one-tap **PDF/CSV export**
   to share with your therapist.
