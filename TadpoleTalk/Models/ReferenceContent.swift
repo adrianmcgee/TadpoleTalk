@@ -64,4 +64,7 @@ struct StarterTarget: Codable, Identifiable, Hashable {
     let text: String
     let shape: SyllableShape
     let phonemeIDs: [String]
+    /// The front/back movement the word practises, when it has one. Optional so entries
+    /// without it still decode.
+    let movement: MovementPattern?
 }

@@ -12,6 +12,7 @@ struct PracticeSessionView: View {
     var repGoal: Int = 5
     var autoAdvance: Bool = false
     var autoPlayModel: Bool = false
+    var acceptsVoicingSwaps: Bool = false
 
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var context
@@ -54,7 +55,8 @@ struct PracticeSessionView: View {
             context: context,
             order: order,
             repGoal: repGoal,
-            autoAdvance: autoAdvance
+            autoAdvance: autoAdvance,
+            acceptsVoicingSwaps: acceptsVoicingSwaps
         )
         vm = newVM
         readinessConfirmed = true
@@ -70,10 +72,12 @@ struct PracticeSessionView: View {
                     VStack(spacing: Theme.sp4) {
                         wordCard(vm)
                         CueLadderView(level: vm.supportLevel, onSelect: vm.selectSupport)
+                        promptPicker(vm)
                         if vm.isShowingDifficultyIntervention {
                             difficultyIntervention(vm)
                         } else {
                             ratingButtons(vm)
+                            voicingSwapNote(vm)
                         }
                     }
                     .frame(maxWidth: Theme.contentMaxWidth)
@@ -137,11 +141,11 @@ struct PracticeSessionView: View {
             }
             wordText(vm)
             hearButtons(vm)
-            if let shape = vm.currentTarget?.shape {
-                Text(shape.code).font(.caption.weight(.semibold))
-                    .padding(.horizontal, Theme.sp2).padding(.vertical, 4)
-                    .background(Theme.brand.opacity(0.14), in: Capsule())
-                    .foregroundStyle(Theme.brandInk)
+            if let target = vm.currentTarget {
+                HStack(spacing: Theme.sp2) {
+                    badge(target.shape.code)
+                    if let movement = target.movement { badge(movement.title) }
+                }
             }
             if let notes = vm.currentTarget?.notes, !notes.isEmpty {
                 Text(notes).font(.subheadline).foregroundStyle(Theme.label2)
@@ -152,6 +156,13 @@ struct PracticeSessionView: View {
         .frame(maxWidth: .infinity)
         .padding(Theme.sp5)
         .background(Theme.card, in: RoundedRectangle(cornerRadius: Theme.corner))
+    }
+
+    private func badge(_ text: String) -> some View {
+        Text(text).font(.caption.weight(.semibold))
+            .padding(.horizontal, Theme.sp2).padding(.vertical, 4)
+            .background(Theme.brand.opacity(0.14), in: Capsule())
+            .foregroundStyle(Theme.brandInk)
     }
 
     /// The big word — or, at phrase level, the carrier phrase with the target word emphasised.
@@ -231,6 +242,37 @@ struct PracticeSessionView: View {
         }
     }
 
+    /// How much prompting the next attempts get. Follows the cue ladder, but the caregiver
+    /// can set it to what they really did; it's saved with each attempt for progress.
+    private func promptPicker(_ vm: PracticeSessionViewModel) -> some View {
+        HStack(spacing: Theme.sp3) {
+            Text("Prompting").font(.subheadline.weight(.medium)).foregroundStyle(Theme.label2)
+            Picker("Prompting", selection: Binding(
+                get: { vm.promptLevel },
+                set: { vm.selectPrompt($0) }
+            )) {
+                ForEach(PromptLevel.allCases.sorted { $0.order < $1.order }) { level in
+                    Text(level.title).tag(level)
+                }
+            }
+            .pickerStyle(.segmented)
+            .accessibilityIdentifier(A11y.practicePrompt)
+        }
+    }
+
+    /// A reminder that voicing swaps still count, with an example on this word.
+    @ViewBuilder
+    private func voicingSwapNote(_ vm: PracticeSessionViewModel) -> some View {
+        if let example = vm.voicingSwapExample, let word = vm.currentTarget?.text {
+            Label("“\(example)” for “\(word)” still counts as Got it! d↔t and g↔k swaps are fine for now.",
+                  systemImage: "checkmark.bubble")
+                .font(.caption)
+                .foregroundStyle(Theme.label2)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .accessibilityIdentifier(A11y.practiceVoicingNote)
+        }
+    }
+
     private func ratingButtons(_ vm: PracticeSessionViewModel) -> some View {
         HStack(spacing: Theme.sp3) {
             ratingButton(.correct, A11y.practiceRatingCorrect, vm)
@@ -257,12 +299,23 @@ struct PracticeSessionView: View {
 
     private func difficultyIntervention(_ vm: PracticeSessionViewModel) -> some View {
         VStack(alignment: .leading, spacing: Theme.sp3) {
-            Label("Good trying — let’s make this easier", systemImage: "heart.fill")
-                .font(.headline)
-                .foregroundStyle(Theme.brandInk)
-            Text("A little more help or a fresh word keeps practice positive.")
-                .font(.subheadline)
-                .foregroundStyle(Theme.label2)
+            if vm.suggestsNewWord {
+                Label("Time for a different word", systemImage: "arrow.triangle.swap")
+                    .font(.headline)
+                    .foregroundStyle(Theme.brandInk)
+                Text("If the same mistake keeps coming back and isn’t changing, more goes won’t help today. "
+                     + "Move on and come back to this word another time.")
+                    .font(.subheadline)
+                    .foregroundStyle(Theme.label2)
+                moveOnButton(vm, prominent: true)
+            } else {
+                Label("Good trying — let’s make this easier", systemImage: "heart.fill")
+                    .font(.headline)
+                    .foregroundStyle(Theme.brandInk)
+                Text("A little more help or a fresh word keeps practice positive.")
+                    .font(.subheadline)
+                    .foregroundStyle(Theme.label2)
+            }
 
             Button {
                 vm.resumeWithMoreSupport()
@@ -270,7 +323,7 @@ struct PracticeSessionView: View {
                 Label(moreSupportTitle(vm), systemImage: "person.2.fill")
                     .frame(maxWidth: .infinity, minHeight: Theme.btnHeight)
             }
-            .buttonStyle(.borderedProminent)
+            .modifier(ProminenceStyle(prominent: !vm.suggestsNewWord))
             .accessibilityIdentifier(A11y.practiceMoreSupport)
 
             Button {
@@ -283,20 +336,26 @@ struct PracticeSessionView: View {
             .buttonStyle(.bordered)
             .accessibilityIdentifier(A11y.practiceModelAndRetry)
 
-            Button {
-                moveOnPositively(vm)
-            } label: {
-                Label(vm.canMoveToAnotherTarget ? "Move to another word" : "Finish positively",
-                      systemImage: vm.canMoveToAnotherTarget ? "arrow.right" : "checkmark.circle")
-                    .frame(maxWidth: .infinity, minHeight: Theme.btnHeight)
+            if !vm.suggestsNewWord {
+                moveOnButton(vm, prominent: false)
             }
-            .buttonStyle(.bordered)
-            .accessibilityIdentifier(A11y.practiceMoveOn)
         }
         .padding(Theme.sp4)
         .background(Theme.accent.opacity(0.12), in: RoundedRectangle(cornerRadius: Theme.corner))
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier(A11y.practiceIntervention)
+    }
+
+    private func moveOnButton(_ vm: PracticeSessionViewModel, prominent: Bool) -> some View {
+        Button {
+            moveOnPositively(vm)
+        } label: {
+            Label(vm.canMoveToAnotherTarget ? "Move to another word" : "Finish positively",
+                  systemImage: vm.canMoveToAnotherTarget ? "arrow.right" : "checkmark.circle")
+                .frame(maxWidth: .infinity, minHeight: Theme.btnHeight)
+        }
+        .modifier(ProminenceStyle(prominent: prominent))
+        .accessibilityIdentifier(A11y.practiceMoveOn)
     }
 
     private func moreSupportTitle(_ vm: PracticeSessionViewModel) -> String {
@@ -343,6 +402,20 @@ struct PracticeSessionView: View {
         Task {
             try? await Task.sleep(for: .seconds(1.2))
             goNext(vm)
+        }
+    }
+}
+
+/// Bordered-prominent for the recommended choice, plain bordered otherwise. (The two
+/// button styles are different types, so they can't be picked with a ternary.)
+private struct ProminenceStyle: ViewModifier {
+    let prominent: Bool
+    @ViewBuilder
+    func body(content: Content) -> some View {
+        if prominent {
+            content.buttonStyle(.borderedProminent)
+        } else {
+            content.buttonStyle(.bordered)
         }
     }
 }

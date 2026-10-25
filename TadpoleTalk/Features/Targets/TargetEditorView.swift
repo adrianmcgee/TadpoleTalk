@@ -13,6 +13,8 @@ struct TargetEditorView: View {
 
     @State private var text: String = ""
     @State private var shape: SyllableShape = .cv
+    /// Stored as `WordTarget.movementRaw`: empty for "work it out from the spelling".
+    @State private var movementRaw: String = ""
     @State private var notes: String = ""
     @State private var activeThisWeek: Bool = true
     @State private var phonemeIDs: Set<String> = []
@@ -46,6 +48,18 @@ struct TargetEditorView: View {
             : "\(template) \(word)"
     }
 
+    private var autoMovementTitle: String {
+        "Automatic (\(MovementPattern.guess(for: text)?.title ?? "none"))"
+    }
+
+    private var movementFooter: String {
+        let chosen = movementRaw.isEmpty
+            ? MovementPattern.guess(for: text)
+            : MovementPattern(rawValue: movementRaw)
+        return chosen?.detail
+            ?? "Front sounds (d, t) use the tongue tip; back sounds (g, k) use the back of the tongue."
+    }
+
     var body: some View {
         NavigationStack {
             Form {
@@ -61,6 +75,20 @@ struct TargetEditorView: View {
                         }
                     }
                     .accessibilityIdentifier(A11y.targetShape)
+                }
+                Section {
+                    Picker("Movement", selection: $movementRaw) {
+                        Text(autoMovementTitle).tag("")
+                        ForEach(MovementPattern.allCases) { m in
+                            Text(m.title).tag(m.rawValue)
+                        }
+                        Text("None").tag(MovementPattern.storedNone)
+                    }
+                    .accessibilityIdentifier(A11y.targetMovement)
+                } header: {
+                    Text("Tongue movement")
+                } footer: {
+                    Text(movementFooter)
                 }
                 Section("Focus sounds (optional)") {
                     ForEach(allPhonemes) { p in
@@ -135,6 +163,7 @@ struct TargetEditorView: View {
         guard let existing else { return }
         text = existing.text
         shape = existing.shape
+        movementRaw = existing.movementRaw
         notes = existing.notes
         activeThisWeek = existing.isActiveThisWeek
         phonemeIDs = Set(existing.phonemeIDs)
@@ -148,6 +177,7 @@ struct TargetEditorView: View {
         if let existing {
             existing.text = text.trimmingCharacters(in: .whitespaces)
             existing.shape = shape
+            existing.movementRaw = movementRaw
             existing.notes = notes
             existing.isActiveThisWeek = activeThisWeek
             existing.phonemeIDs = Array(phonemeIDs)
@@ -155,10 +185,12 @@ struct TargetEditorView: View {
             existing.audioFilename = audioFilename
             vm.save(in: context)
         } else {
-            vm.add(text: text, shape: shape, phonemeIDs: Array(phonemeIDs),
-                   notes: notes, activeThisWeek: activeThisWeek,
-                   carrierPhrase: resolvedCarrierPhrase, audioFilename: audioFilename,
-                   id: clipID, to: child, in: context)
+            let target = vm.add(text: text, shape: shape, phonemeIDs: Array(phonemeIDs),
+                                notes: notes, activeThisWeek: activeThisWeek,
+                                carrierPhrase: resolvedCarrierPhrase, audioFilename: audioFilename,
+                                id: clipID, to: child, in: context)
+            target.movementRaw = movementRaw
+            vm.save(in: context)
         }
         onClose()
     }

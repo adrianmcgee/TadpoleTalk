@@ -39,6 +39,19 @@ struct ContentStore {
             }
     }
 
+    /// Starter words that practise a front/back movement, grouped by shape (easiest first)
+    /// then movement — the ready-made sets offered on the Targets tab.
+    var movementSets: [MovementSet] {
+        var sets: [MovementSet] = []
+        for shape in SyllableShape.allCases {
+            for movement in MovementPattern.allCases {
+                let targets = starterTargets.filter { $0.shape == shape && $0.movement == movement }
+                if !targets.isEmpty { sets.append(MovementSet(shape: shape, movement: movement, targets: targets)) }
+            }
+        }
+        return sets
+    }
+
     private static func load<T: Decodable>(_ name: String, as type: T.Type) -> T? {
         guard let url = Bundle.main.url(forResource: name, withExtension: "json") else {
             log("missing bundled resource \(name).json")
@@ -58,4 +71,12 @@ struct ContentStore {
         print("[ContentStore] \(message)")
         #endif
     }
+}
+
+/// Starter words of one shape that share a front/back movement.
+struct MovementSet: Identifiable {
+    var id: String { "\(shape.rawValue)-\(movement.rawValue)" }
+    let shape: SyllableShape
+    let movement: MovementPattern
+    let targets: [StarterTarget]
 }

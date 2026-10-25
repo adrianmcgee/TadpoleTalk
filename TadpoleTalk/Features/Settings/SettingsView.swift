@@ -16,6 +16,7 @@ struct SettingsView: View {
     @AppStorage("practiceOrderRaw") private var practiceOrderRaw = PracticeOrder.blocked.rawValue
     @AppStorage("autoAdvance") private var autoAdvance = false
     @AppStorage("autoPlayModel") private var autoPlayModel = true
+    @AppStorage("acceptVoicingSwaps") private var acceptVoicingSwaps = false
 
     private let reminders = PracticeReminders()
 
@@ -70,6 +71,16 @@ struct SettingsView: View {
                 } footer: {
                     Text(PracticeOrder(rawValue: practiceOrderRaw)?.detail
                          ?? "Choose how practice is paced.")
+                }
+
+                Section {
+                    Toggle("Voicing swaps are OK", isOn: $acceptVoicingSwaps)
+                        .accessibilityIdentifier(A11y.settingsVoicingSwaps)
+                } header: {
+                    Text("Therapy focus")
+                } footer: {
+                    Text("Turn on if your speech pathologist says d↔t and g↔k mix-ups don't matter yet "
+                         + "(\"gat\" for \"cat\"). Practice will remind you these still count as Got it!")
                 }
 
                 Section("Child") {

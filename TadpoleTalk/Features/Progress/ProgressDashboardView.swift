@@ -18,6 +18,7 @@ struct ProgressDashboardView: View {
                 VStack(spacing: Theme.sp5) {
                     headlineRow
                     practiceChartCard
+                    movementCard
                     perWordCard
                     exportButton
                 }
@@ -91,20 +92,62 @@ struct ProgressDashboardView: View {
                     VStack(alignment: .leading, spacing: 4) {
                         HStack {
                             Text(target.word).font(.subheadline.weight(.medium)).foregroundStyle(Theme.label)
+                            if let movement = target.movement {
+                                Text(movement.title).font(.caption2.weight(.semibold)).foregroundStyle(Theme.brandInk)
+                            }
                             Spacer()
                             Text("\(target.successes)/\(target.total)").font(.caption).foregroundStyle(Theme.label2)
                         }
                         ProgressView(value: target.rate)
                             .tint(target.rate >= 0.8 ? Theme.correct : Theme.brand)
+                        if let prompting = promptingText(target) {
+                            Text(prompting).font(.caption).foregroundStyle(Theme.label2)
+                        }
                     }
                     .accessibilityElement(children: .combine)
-                    .accessibilityLabel("\(target.word): \(target.successes) of \(target.total) good, \(Int(target.rate * 100)) percent")
+                    .accessibilityLabel("\(target.word): \(target.successes) of \(target.total) good, "
+                                        + "\(Int(target.rate * 100)) percent. \(promptingText(target) ?? "")")
                 }
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(Theme.sp4)
         .background(Theme.card, in: RoundedRectangle(cornerRadius: Theme.corner))
+    }
+
+    /// "Best: mild prompting · Last: max prompting", or nil when no prompting was logged.
+    private func promptingText(_ target: ProgressViewModel.TargetProgress) -> String? {
+        var parts: [String] = []
+        if let best = target.leastPromptForSuccess { parts.append("Best: \(best.summary)") }
+        if let last = target.latestPrompt { parts.append("Last: \(last.summary)") }
+        return parts.isEmpty ? nil : parts.joined(separator: " · ")
+    }
+
+    /// Front → back vs back → front at a glance, shown once any movement word is practised.
+    @ViewBuilder
+    private var movementCard: some View {
+        let movements = vm.perMovement(child)
+        if !movements.isEmpty {
+            VStack(alignment: .leading, spacing: Theme.sp3) {
+                Text("Tongue movement").font(.headline).foregroundStyle(Theme.label)
+                ForEach(movements) { item in
+                    VStack(alignment: .leading, spacing: 4) {
+                        HStack {
+                            Text(item.movement.title).font(.subheadline.weight(.medium)).foregroundStyle(Theme.label)
+                            Spacer()
+                            Text("\(item.successes)/\(item.total)").font(.caption).foregroundStyle(Theme.label2)
+                        }
+                        ProgressView(value: item.rate)
+                            .tint(item.rate >= 0.8 ? Theme.correct : Theme.brand)
+                    }
+                    .accessibilityElement(children: .combine)
+                    .accessibilityLabel("\(item.movement.title): \(item.successes) of \(item.total) good")
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(Theme.sp4)
+            .background(Theme.card, in: RoundedRectangle(cornerRadius: Theme.corner))
+        }
     }
 
     private var exportButton: some View {

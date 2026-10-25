@@ -9,6 +9,7 @@ struct TargetListView: View {
     @State private var vm = TargetsViewModel()
     @State private var editing: WordTarget?
     @State private var addingNew = false
+    @State private var addingSet = false
 
     private var groups: [(shape: SyllableShape, targets: [WordTarget])] {
         vm.grouped(child.targets)
@@ -18,7 +19,8 @@ struct TargetListView: View {
         NavigationStack {
             List {
                 Section {
-                    Text("Tap the star to add a word to this week's practice set. Words are grouped by sound shape, easiest first.")
+                    Text("Tap the star to add a word to this week's practice set. Words are grouped by sound shape, easiest first. "
+                         + "Use the ••• menu for ready-made front ↔ back movement sets.")
                         .font(.footnote).foregroundStyle(Theme.label2)
                         .listRowBackground(Color.clear)
                 }
@@ -37,6 +39,12 @@ struct TargetListView: View {
             }
             .navigationTitle("Targets")
             .toolbar {
+                ToolbarItem(placement: .secondaryAction) {
+                    Button { addingSet = true } label: {
+                        Label("Movement word sets", systemImage: "arrow.left.arrow.right")
+                    }
+                    .accessibilityIdentifier(A11y.addWordSet)
+                }
                 ToolbarItem(placement: .primaryAction) {
                     Button { addingNew = true } label: { Image(systemName: "plus") }
                         .accessibilityLabel("Add a word")
@@ -45,6 +53,9 @@ struct TargetListView: View {
             }
             .sheet(isPresented: $addingNew) {
                 TargetEditorView(child: child) { addingNew = false }
+            }
+            .sheet(isPresented: $addingSet) {
+                WordSetsView(child: child) { addingSet = false }
             }
             .sheet(item: $editing) { target in
                 TargetEditorView(child: child, existing: target) { editing = nil }
@@ -67,6 +78,9 @@ struct TargetListView: View {
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(target.text).font(.body.weight(.medium)).foregroundStyle(Theme.label)
+                if let movement = target.movement {
+                    Text(movement.title).font(.caption.weight(.semibold)).foregroundStyle(Theme.brandInk)
+                }
                 if !target.notes.isEmpty {
                     Text(target.notes).font(.caption).foregroundStyle(Theme.label2)
                 }
