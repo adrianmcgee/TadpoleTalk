@@ -8,8 +8,7 @@ struct SettingsView: View {
 
     @Environment(\.modelContext) private var context
     @AppStorage("remindersEnabled") private var remindersEnabled = false
-    @AppStorage("remindersPerDay") private var remindersPerDay = 3
-    /// First reminder time, stored as minutes since midnight. Default 9:00 AM.
+    /// Reminder time, stored as minutes since midnight. Default 9:00 AM.
     @AppStorage("reminderMinutes") private var reminderMinutes = 9 * 60
 
     // Practice settings, read back when starting a session on the home screen.
@@ -42,16 +41,15 @@ struct SettingsView: View {
                     Toggle("Daily practice reminders", isOn: $remindersEnabled)
                         .accessibilityIdentifier("settings.remindersToggle")
                     if remindersEnabled {
-                        DatePicker("First reminder at",
+                        DatePicker("Remind me at",
                                    selection: reminderTime,
                                    displayedComponents: .hourAndMinute)
                             .accessibilityIdentifier("settings.reminderTime")
-                        Stepper("\(remindersPerDay) a day", value: $remindersPerDay, in: 1...4)
                     }
                 } header: {
                     Text("Reminders")
                 } footer: {
-                    Text("Short, spread-out nudges — because a few minutes several times a day helps far more than one long session.")
+                    Text("One gentle nudge a day. A few minutes of practice helps far more than one long session.")
                 }
 
                 Section {
@@ -97,7 +95,6 @@ struct SettingsView: View {
                 }
             }
             .onChange(of: remindersEnabled) { _, on in applyReminders(enabled: on) }
-            .onChange(of: remindersPerDay) { _, _ in if remindersEnabled { applyReminders(enabled: true) } }
             .onChange(of: reminderMinutes) { _, _ in if remindersEnabled { applyReminders(enabled: true) } }
         }
     }
@@ -116,6 +113,9 @@ struct SettingsView: View {
                     + "There is no account to create, no analytics, and nothing is sent to any server. "
                     + "When you export a report, you choose exactly where it goes.")
                     .font(.body).foregroundStyle(Theme.label2)
+                Text("Optional demo videos in the Library play from YouTube's privacy-enhanced mode and need "
+                    + "an internet connection. Nothing loads until you open one, and none of your data is sent.")
+                    .font(.body).foregroundStyle(Theme.label2)
             }
             .frame(maxWidth: Theme.contentMaxWidth)
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -131,9 +131,7 @@ struct SettingsView: View {
             if enabled {
                 let granted = await reminders.requestAuthorization()
                 if granted {
-                    await reminders.schedule(timesPerDay: remindersPerDay,
-                                             startHour: reminderMinutes / 60,
-                                             startMinute: reminderMinutes % 60)
+                    await reminders.schedule(hour: reminderMinutes / 60, minute: reminderMinutes % 60)
                 } else {
                     remindersEnabled = false   // permission denied — reflect reality
                 }

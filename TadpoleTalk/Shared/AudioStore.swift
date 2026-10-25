@@ -32,6 +32,15 @@ struct AudioStore {
         return FileManager.default.fileExists(atPath: url(for: filename).path)
     }
 
+    /// Delete every stored clip whose filename isn't in `keeping` — clips left behind by
+    /// words deleted before recordings were cleaned up with them.
+    func removeOrphans(keeping: Set<String>) {
+        let files = (try? FileManager.default.contentsOfDirectory(atPath: directory.path)) ?? []
+        for name in files where name.hasSuffix(".m4a") && !keeping.contains(name) {
+            delete(name)
+        }
+    }
+
     /// Delete a stored clip, ignoring a missing file.
     func delete(_ filename: String?) {
         guard let filename, !filename.isEmpty else { return }

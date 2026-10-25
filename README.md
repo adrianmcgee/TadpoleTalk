@@ -17,7 +17,7 @@ iOS / iPadOS 17+ · SwiftUI · MVVM · SwiftData (local-only) · XcodeGen.
   and Key Word Signs.
 - **Progress** — charts of practice over time and per word, plus a one-tap **PDF/CSV export**
   to share with your therapist.
-- **Reminders** — gentle, spread-out nudges for little-and-often practice.
+- **Reminders** — one gentle daily nudge at a time you choose.
 - **Privacy** — everything stays on the device. No account, no tracking, nothing uploaded.
 
 > Tadpole Talk does not diagnose, assess, or replace professional care. It ships only its own

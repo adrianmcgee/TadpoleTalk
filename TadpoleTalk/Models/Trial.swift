@@ -6,13 +6,18 @@ import SwiftData
 @Model
 final class Trial {
     var targetText: String = ""
+    /// The `WordTarget.id` this attempt was at, so history stays together when the word is
+    /// renamed. Optional so lightweight migration can add it; older rows are backfilled by
+    /// `LaunchMaintenance`, and any it can't match fall back to `targetText`.
+    var targetID: UUID?
     var ratingRaw: String = TrialRating.correct.rawValue
     var timestamp: Date = Date()
 
     var session: PracticeSession?
 
-    init(targetText: String, rating: TrialRating, timestamp: Date = Date()) {
+    init(targetText: String, targetID: UUID? = nil, rating: TrialRating, timestamp: Date = Date()) {
         self.targetText = targetText
+        self.targetID = targetID
         self.ratingRaw = rating.rawValue
         self.timestamp = timestamp
     }

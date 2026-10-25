@@ -17,6 +17,11 @@ targets:
     platform: iOS
     sources:
       - path: TadpoleTalk
+        excludes:
+          - Resources/PrivacyInfo.xcprivacy
+      # Listed explicitly so it's always copied as a resource, whatever XcodeGen version.
+      - path: TadpoleTalk/Resources/PrivacyInfo.xcprivacy
+        buildPhase: resources
     info:
       path: TadpoleTalk/Info.plist
       properties:
@@ -40,7 +45,6 @@ targets:
           - UIInterfaceOrientationLandscapeRight
         # Microphone is used when a parent records their own voice as the model for a word.
         NSMicrophoneUsageDescription: "Record your own voice saying a word so your child hears a familiar model during practice. Recordings stay on this device."
-        NSCameraUsageDescription: "Record a short video of your therapist's sound or sign demonstration to play back during home practice."
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.adrianmcgee.tadpoletalk
