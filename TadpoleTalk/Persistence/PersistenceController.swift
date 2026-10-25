@@ -11,6 +11,8 @@ import os
 @Observable
 final class PersistenceController {
     let container: ModelContainer
+    /// True for the throwaway in-memory store used by tests and `-localStore` runs.
+    let isInMemory: Bool
 
     static let log = Logger(subsystem: "com.adrianmcgee.tadpoletalk", category: "persistence")
 
@@ -24,6 +26,7 @@ final class PersistenceController {
         let runningTests = env["XCTestConfigurationFilePath"] != nil || env["XCTestBundlePath"] != nil
         let memory = inMemory || runningTests
             || ProcessInfo.processInfo.arguments.contains("-localStore")
+        self.isInMemory = memory
 
         let config = ModelConfiguration(
             "TadpoleTalk",

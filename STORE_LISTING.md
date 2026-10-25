@@ -30,7 +30,7 @@ Built around how CAS practice actually works:
   therapist uses.
 • A reference library for sounds (with plain-language placement and cue guidance) and Key Word Signs.
 • Progress charts, plus a one-tap PDF/CSV export to share with your speech pathologist.
-• Gentle, spread-out reminders for little-and-often practice.
+• A gentle daily reminder at a time that suits your family.
 
 Private by design: everything stays on your device. No account, no tracking, nothing
 uploaded.

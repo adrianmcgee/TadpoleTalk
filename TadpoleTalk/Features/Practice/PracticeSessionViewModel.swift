@@ -128,10 +128,10 @@ final class PracticeSessionViewModel {
     }
 
     /// Log one attempt at the current word. Successes count toward the rep goal and trigger
-    /// the celebration. Trials stay keyed by the bare word so progress/export are unchanged.
+    /// the celebration. Trials record the bare word and the target id, so progress survives a rename.
     func log(_ rating: TrialRating) {
         guard let target = currentTarget, !isShowingDifficultyIntervention else { return }
-        let trial = Trial(targetText: target.text, rating: rating)
+        let trial = Trial(targetText: target.text, targetID: target.id, rating: rating)
         trial.session = session
         context.insert(trial)
         session.trials.append(trial)

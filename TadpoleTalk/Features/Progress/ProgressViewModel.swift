@@ -15,7 +15,7 @@ final class ProgressViewModel {
     }
 
     struct TargetProgress: Identifiable {
-        var id: String { word }
+        let id: String
         let word: String
         let successes: Int
         let total: Int
@@ -39,18 +39,23 @@ final class ProgressViewModel {
         }
     }
 
-    /// Per-word totals across every session, best-practised first.
+    /// Per-word totals across every session, best-practised first. Grouped by the target's
+    /// id so a renamed word keeps its history and shows its current name; trials with no id
+    /// (or whose word was deleted) fall back to the text that was logged.
     func perTarget(_ child: Child) -> [TargetProgress] {
-        var map: [String: (s: Int, t: Int)] = [:]
+        let currentNames = Dictionary(child.targets.map { ($0.id, $0.text) }, uniquingKeysWith: { first, _ in first })
+        var map: [String: (word: String, s: Int, t: Int)] = [:]
         for session in child.sessions {
             for trial in session.trials {
-                let prev = map[trial.targetText] ?? (0, 0)
-                map[trial.targetText] = (prev.s + (trial.rating.isSuccess ? 1 : 0), prev.t + 1)
+                let key = trial.targetID?.uuidString ?? "text:\(trial.targetText)"
+                let word = trial.targetID.flatMap { currentNames[$0] } ?? trial.targetText
+                let prev = map[key] ?? (word, 0, 0)
+                map[key] = (word, prev.s + (trial.rating.isSuccess ? 1 : 0), prev.t + 1)
             }
         }
         return map
-            .map { TargetProgress(word: $0.key, successes: $0.value.s, total: $0.value.t) }
-            .sorted { $0.total > $1.total }
+            .map { TargetProgress(id: $0.key, word: $0.value.word, successes: $0.value.s, total: $0.value.t) }
+            .sorted { ($0.total, $1.word) > ($1.total, $0.word) }
     }
 
     func totalSessions(_ child: Child) -> Int { child.sessions.filter { $0.totalCount > 0 }.count }

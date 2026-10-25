@@ -5,6 +5,8 @@ import SwiftData
 /// child profile, then the main app. A non-blocking save-failure banner sits over it all.
 struct RootView: View {
     @Environment(SaveStatus.self) private var saveStatus
+    @Environment(PersistenceController.self) private var persistence
+    @Environment(\.modelContext) private var context
     @Query(sort: \Child.createdAt) private var children: [Child]
 
     @AppStorage("hasAcceptedDisclaimer") private var hasAcceptedDisclaimer = false
@@ -28,6 +30,12 @@ struct RootView: View {
             }
         }
         .animation(.spring(duration: 0.3), value: saveStatus.lastFailure)
+        .task {
+            // Skip against a throwaway store: with no words in it, the recordings sweep would
+            // wipe real clips on the device, and it could race files a test is writing.
+            guard !persistence.isInMemory else { return }
+            await LaunchMaintenance.run(in: context)
+        }
         .overlay {
             if showSplash {
                 SplashView()

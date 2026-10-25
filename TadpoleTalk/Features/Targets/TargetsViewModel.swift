@@ -39,6 +39,7 @@ final class TargetsViewModel {
     }
 
     func delete(_ target: WordTarget, in context: ModelContext) {
+        AudioStore.shared.delete(target.audioFilename)
         context.delete(target)
         context.saveOrLog()
     }
