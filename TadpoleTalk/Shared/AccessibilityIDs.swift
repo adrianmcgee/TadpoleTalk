@@ -28,7 +28,9 @@ enum A11y {
     static let targetActive    = "targetEditor.activeThisWeek"
     static let targetSave      = "targetEditor.save"
     static let targetCarrier   = "targetEditor.carrierPhrase"
+    static let targetMovement  = "targetEditor.movement"
     static let targetRecordModel = "targetEditor.recordModel"
+    static let addWordSet      = "targets.addWordSet"
     static func targetRow(_ text: String) -> String { "target.row.\(text)" }
 
     // Practice
@@ -47,6 +49,8 @@ enum A11y {
     static let practiceMoreSupport    = "practice.intervention.moreSupport"
     static let practiceModelAndRetry  = "practice.intervention.modelAndRetry"
     static let practiceMoveOn         = "practice.intervention.moveOn"
+    static let practicePrompt         = "practice.prompt"
+    static let practiceVoicingNote    = "practice.voicingNote"
     static func practiceSupport(_ level: PracticeSupportLevel) -> String {
         "practice.support.\(level.rawValue)"
     }
@@ -56,6 +60,7 @@ enum A11y {
     static let settingsPracticeOrder  = "settings.practiceOrder"
     static let settingsAutoAdvance    = "settings.autoAdvance"
     static let settingsAutoPlayModel  = "settings.autoPlayModel"
+    static let settingsVoicingSwaps   = "settings.acceptVoicingSwaps"
 
     // Progress
     static let exportReport = "progress.export"

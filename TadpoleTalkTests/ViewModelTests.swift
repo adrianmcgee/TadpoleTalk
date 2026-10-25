@@ -65,7 +65,7 @@ final class ViewModelTests: XCTestCase {
         TestSupport.addSession(to: child, in: context, on: Date(), ratings: [.correct, .tryAgain])
         let csv = ReportExporter().makeCSV(for: child)
         let lines = csv.split(separator: "\n")
-        XCTAssertEqual(lines.first, "date,time,word,rating")
+        XCTAssertEqual(lines.first, "date,time,word,rating,prompting")
         XCTAssertEqual(lines.count, 3)  // header + 2 trials
         XCTAssertTrue(csv.contains("more,correct"))
     }

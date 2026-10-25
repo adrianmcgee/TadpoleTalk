@@ -24,6 +24,10 @@ final class WordTarget {
     /// Filename (within `AudioStore`'s recordings directory) of a parent-recorded model of
     /// this word, if any. Absent for most targets — TTS is the default model.
     var audioFilename: String?
+    /// The front/back movement this word practises. Empty means "work it out from the
+    /// spelling", `"none"` means the parent said it doesn't apply; otherwise a
+    /// `MovementPattern` raw value. Defaulted so lightweight migration can add it.
+    var movementRaw: String = ""
     var createdAt: Date = Date()
 
     var child: Child?
@@ -47,6 +51,16 @@ final class WordTarget {
     var shape: SyllableShape {
         get { SyllableShape(rawValue: shapeRaw) ?? .other }
         set { shapeRaw = newValue.rawValue }
+    }
+
+    /// The movement this word practises: the parent's choice when they've made one,
+    /// otherwise a guess from the spelling.
+    var movement: MovementPattern? {
+        switch movementRaw {
+        case "": return MovementPattern.guess(for: text)
+        case MovementPattern.storedNone: return nil
+        default: return MovementPattern(rawValue: movementRaw) ?? MovementPattern.guess(for: text)
+        }
     }
 
     /// True when the parent has attached their own recorded model for this word.

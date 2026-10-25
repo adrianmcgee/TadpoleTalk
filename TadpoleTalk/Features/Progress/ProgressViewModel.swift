@@ -19,6 +19,21 @@ final class ProgressViewModel {
         let word: String
         let successes: Int
         let total: Int
+        /// The front/back movement the word practises, if it's still in the target bank.
+        var movement: MovementPattern?
+        /// Prompting on the most recent attempt that recorded it.
+        var latestPrompt: PromptLevel?
+        /// The least prompting any successful attempt has needed — the best so far.
+        var leastPromptForSuccess: PromptLevel?
+        var rate: Double { total == 0 ? 0 : Double(successes) / Double(total) }
+    }
+
+    /// Totals for every word practising one front/back movement.
+    struct MovementProgress: Identifiable {
+        var id: MovementPattern { movement }
+        let movement: MovementPattern
+        let successes: Int
+        let total: Int
         var rate: Double { total == 0 ? 0 : Double(successes) / Double(total) }
     }
 
@@ -43,19 +58,38 @@ final class ProgressViewModel {
     /// id so a renamed word keeps its history and shows its current name; trials with no id
     /// (or whose word was deleted) fall back to the text that was logged.
     func perTarget(_ child: Child) -> [TargetProgress] {
-        let currentNames = Dictionary(child.targets.map { ($0.id, $0.text) }, uniquingKeysWith: { first, _ in first })
-        var map: [String: (word: String, s: Int, t: Int)] = [:]
-        for session in child.sessions {
-            for trial in session.trials {
-                let key = trial.targetID?.uuidString ?? "text:\(trial.targetText)"
-                let word = trial.targetID.flatMap { currentNames[$0] } ?? trial.targetText
-                let prev = map[key] ?? (word, 0, 0)
-                map[key] = (word, prev.s + (trial.rating.isSuccess ? 1 : 0), prev.t + 1)
+        let current = Dictionary(child.targets.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
+        var map: [String: TargetProgress] = [:]
+        let trials = child.sessions.flatMap(\.trials).sorted { $0.timestamp < $1.timestamp }
+        for trial in trials {
+            let key = trial.targetID?.uuidString ?? "text:\(trial.targetText)"
+            let target = trial.targetID.flatMap { current[$0] }
+            let prev = map[key] ?? TargetProgress(id: key, word: target?.text ?? trial.targetText,
+                                                  successes: 0, total: 0, movement: target?.movement)
+            var next = TargetProgress(id: key, word: prev.word,
+                                      successes: prev.successes + (trial.rating.isSuccess ? 1 : 0),
+                                      total: prev.total + 1, movement: prev.movement,
+                                      latestPrompt: trial.prompt ?? prev.latestPrompt,
+                                      leastPromptForSuccess: prev.leastPromptForSuccess)
+            if trial.rating.isSuccess, let prompt = trial.prompt,
+               prompt.order > (prev.leastPromptForSuccess?.order ?? -1) {
+                next.leastPromptForSuccess = prompt
             }
+            map[key] = next
         }
-        return map
-            .map { TargetProgress(id: $0.key, word: $0.value.word, successes: $0.value.s, total: $0.value.t) }
-            .sorted { ($0.total, $1.word) > ($1.total, $0.word) }
+        return map.values.sorted { ($0.total, $1.word) > ($1.total, $0.word) }
+    }
+
+    /// Totals per front/back movement, across the words currently tagged with one.
+    func perMovement(_ child: Child) -> [MovementProgress] {
+        let words = perTarget(child)
+        return MovementPattern.allCases.compactMap { movement in
+            let matching = words.filter { $0.movement == movement }
+            guard !matching.isEmpty else { return nil }
+            return MovementProgress(movement: movement,
+                                    successes: matching.reduce(0) { $0 + $1.successes },
+                                    total: matching.reduce(0) { $0 + $1.total })
+        }
     }
 
     func totalSessions(_ child: Child) -> Int { child.sessions.filter { $0.totalCount > 0 }.count }

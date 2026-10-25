@@ -9,7 +9,7 @@ struct ReportExporter {
 
     /// CSV with one row per trial: the SLP can pivot it however they like.
     func makeCSV(for child: Child) -> String {
-        var rows = ["date,time,word,rating"]
+        var rows = ["date,time,word,rating,prompting"]
         let dateFmt = DateFormatter(); dateFmt.dateFormat = "yyyy-MM-dd"
         let timeFmt = DateFormatter(); timeFmt.dateFormat = "HH:mm"
         let trials = child.sessions
@@ -17,7 +17,8 @@ struct ReportExporter {
             .sorted { $0.timestamp < $1.timestamp }
         for trial in trials {
             let word = trial.targetText.replacingOccurrences(of: ",", with: " ")
-            rows.append("\(dateFmt.string(from: trial.timestamp)),\(timeFmt.string(from: trial.timestamp)),\(word),\(trial.rating.rawValue)")
+            rows.append("\(dateFmt.string(from: trial.timestamp)),\(timeFmt.string(from: trial.timestamp)),"
+                        + "\(word),\(trial.rating.rawValue),\(trial.prompt?.rawValue ?? "")")
         }
         return rows.joined(separator: "\n")
     }
@@ -61,17 +62,21 @@ struct ReportExporter {
                 y += 36
 
                 draw("Word", at: CGPoint(x: left, y: y), font: .boldSystemFont(ofSize: 13))
-                draw("Great reps", at: CGPoint(x: 280, y: y), font: .boldSystemFont(ofSize: 13))
-                draw("Tries", at: CGPoint(x: 400, y: y), font: .boldSystemFont(ofSize: 13))
-                draw("Success", at: CGPoint(x: 480, y: y), font: .boldSystemFont(ofSize: 13))
+                draw("Great reps", at: CGPoint(x: 200, y: y), font: .boldSystemFont(ofSize: 13))
+                draw("Tries", at: CGPoint(x: 290, y: y), font: .boldSystemFont(ofSize: 13))
+                draw("Success", at: CGPoint(x: 350, y: y), font: .boldSystemFont(ofSize: 13))
+                draw("Best prompting", at: CGPoint(x: 430, y: y), font: .boldSystemFont(ofSize: 13))
                 y += 22
 
                 for target in targets {
                     if y > pageRect.height - 60 { ctx.beginPage(); y = 48 }
-                    draw(target.word, at: CGPoint(x: left, y: y), font: .systemFont(ofSize: 12))
-                    draw("\(target.successes)", at: CGPoint(x: 280, y: y), font: .systemFont(ofSize: 12))
-                    draw("\(target.total)", at: CGPoint(x: 400, y: y), font: .systemFont(ofSize: 12))
-                    draw("\(Int(target.rate * 100))%", at: CGPoint(x: 480, y: y), font: .systemFont(ofSize: 12))
+                    let word = target.movement.map { "\(target.word) (\($0.title))" } ?? target.word
+                    draw(word, at: CGPoint(x: left, y: y), font: .systemFont(ofSize: 12))
+                    draw("\(target.successes)", at: CGPoint(x: 200, y: y), font: .systemFont(ofSize: 12))
+                    draw("\(target.total)", at: CGPoint(x: 290, y: y), font: .systemFont(ofSize: 12))
+                    draw("\(Int(target.rate * 100))%", at: CGPoint(x: 350, y: y), font: .systemFont(ofSize: 12))
+                    draw(target.leastPromptForSuccess?.summary ?? "–", at: CGPoint(x: 430, y: y),
+                         font: .systemFont(ofSize: 12))
                     y += 20
                 }
 

@@ -38,6 +38,34 @@ final class TargetsViewModel {
         return target
     }
 
+    /// Put a ready-made set of words into this week's practice: words the child already has
+    /// (matched ignoring case) are starred, the rest are added. Returns how many were new.
+    @discardableResult
+    func addToThisWeek(_ starters: [StarterTarget], to child: Child, in context: ModelContext) -> Int {
+        var added = 0
+        for starter in starters {
+            if let existing = existingTarget(matching: starter.text, in: child) {
+                existing.isActiveThisWeek = true
+            } else {
+                let target = WordTarget(text: starter.text, shape: starter.shape,
+                                        phonemeIDs: starter.phonemeIDs, isActiveThisWeek: true)
+                target.child = child
+                context.insert(target)
+                added += 1
+            }
+        }
+        context.saveOrLog()
+        return added
+    }
+
+    /// The child's word with this text, ignoring case and surrounding spaces.
+    func existingTarget(matching text: String, in child: Child) -> WordTarget? {
+        let wanted = text.trimmingCharacters(in: .whitespaces)
+        return child.targets.first {
+            $0.text.trimmingCharacters(in: .whitespaces).caseInsensitiveCompare(wanted) == .orderedSame
+        }
+    }
+
     func delete(_ target: WordTarget, in context: ModelContext) {
         AudioStore.shared.delete(target.audioFilename)
         context.delete(target)

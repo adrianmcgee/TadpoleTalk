@@ -10,12 +10,17 @@ iOS / iPadOS 17+ · SwiftUI · MVVM · SwiftData (local-only) · XcodeGen.
 - **Today** — an encouraging home screen: this week's words, a practice streak, one button
   to start a short session.
 - **Practice** — parent-led, one word at a time, with plain-language sound guidance, a DTTC-style
-  cueing-ladder reminder, three one-tap ratings, and a celebratory reward on success.
+  cueing-ladder reminder, three one-tap ratings, and a celebratory reward on success. Each
+  attempt logs its prompting level (max / mild / none); an optional reminder says d↔t and
+  g↔k voicing swaps still count; and a word that keeps missing prompts a move to a new one.
 - **Targets** — a word bank organised by syllable shape (CV → VC → CVC → CVCV…), seeded and
-  fully editable; star the words that are this week's focus.
+  fully editable; star the words that are this week's focus. Words are tagged with their
+  tongue movement (front → back like "digger", back → front like "cat"), and ready-made
+  movement sets add a week's CVC / CVCV words in one tap.
 - **Library** — reference for speech sounds (plain-language how-to and optional hand cues)
   and Key Word Signs.
-- **Progress** — charts of practice over time and per word, plus a one-tap **PDF/CSV export**
+- **Progress** — charts of practice over time, per movement and per word (with best and latest
+  prompting), plus a one-tap **PDF/CSV export**
   to share with your therapist.
 - **Reminders** — one gentle daily nudge at a time you choose.
 - **Privacy** — everything stays on the device. No account, no tracking, nothing uploaded.

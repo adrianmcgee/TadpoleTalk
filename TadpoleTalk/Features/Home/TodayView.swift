@@ -15,6 +15,7 @@ struct TodayView: View {
     @AppStorage("practiceOrderRaw") private var practiceOrderRaw = PracticeOrder.blocked.rawValue
     @AppStorage("autoAdvance") private var autoAdvance = false
     @AppStorage("autoPlayModel") private var autoPlayModel = true
+    @AppStorage("acceptVoicingSwaps") private var acceptVoicingSwaps = false
 
     private var activeTargets: [WordTarget] { child.activeTargets }
 
@@ -50,7 +51,8 @@ struct TodayView: View {
                     order: PracticeOrder(rawValue: practiceOrderRaw) ?? .blocked,
                     repGoal: repGoalPerWord,
                     autoAdvance: autoAdvance,
-                    autoPlayModel: autoPlayModel
+                    autoPlayModel: autoPlayModel,
+                    acceptsVoicingSwaps: acceptVoicingSwaps
                 )
             }
             .sheet(isPresented: $showingSettings) {
